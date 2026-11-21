@@ -9,14 +9,14 @@ from __future__ import annotations
 import math
 from typing import TYPE_CHECKING, Any
 
-from gizmo_mcp.device import NotSetUpError, SlowDownError, UnreachableError
+from board_mcp.device import NotSetUpError, SlowDownError, UnreachableError
 
 if TYPE_CHECKING:
-    from gizmo_mcp.device import Gizmo
+    from board_mcp.device import Gizmo
 
 UNREACHABLE = "The gizmo isn't answering. Check that it is switched on and on the network."
 NOT_SET_UP = "No real gizmo is set up yet, so nothing was asked."
-BROKE = "That went wrong inside gizmo-mcp. Try again, and if it fails again, check its log."
+BROKE = "That went wrong inside board-mcp. Try again, and if it fails again, check its log."
 
 
 class GizmoService:

@@ -12,12 +12,12 @@ import pathlib
 import tomllib
 from dataclasses import dataclass
 
-from gizmo_mcp import platform
+from board_mcp import platform
 
 #: The folder under the config home, as the manifest's `config.dir` names it.
-CONFIG_DIR = "gizmo-mcp"
+CONFIG_DIR = "board-mcp"
 #: Points at another config file, for a test or a second gizmo.
-CONFIG_ENV = "GIZMO_MCP_CONFIG"
+CONFIG_ENV = "BOARD_MCP_CONFIG"
 
 
 class SettingsError(ValueError):
@@ -33,7 +33,7 @@ class Settings:
 
 
 def config_file() -> pathlib.Path:
-    """Where the config is: `$GIZMO_MCP_CONFIG`, or the plugin's folder in the config home."""
+    """Where the config is: `$BOARD_MCP_CONFIG`, or the plugin's folder in the config home."""
     named = os.environ.get(CONFIG_ENV)
     return pathlib.Path(named) if named else platform.current().config_home() / CONFIG_DIR / "config.toml"
 
@@ -51,6 +51,6 @@ def load(path: pathlib.Path | None = None) -> Settings:
     device = data.pop("device", {})
     unknown = sorted(data) + sorted(f"device.{key}" for key in device if key not in ("address", "simulate"))
     if unknown:
-        msg = f"{path} has keys gizmo-mcp does not know: {', '.join(unknown)}; remove them or fix their spelling"
+        msg = f"{path} has keys board-mcp does not know: {', '.join(unknown)}; remove them or fix their spelling"
         raise SettingsError(msg)
     return Settings(address=str(device.get("address", Settings.address)), simulate=bool(device.get("simulate", True)))

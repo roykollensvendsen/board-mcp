@@ -2,7 +2,7 @@
 """A private temporary folder per run, that the run removes and a later run sweeps if it was killed.
 
 No test run, mutation run or ratchet run may leave a temporary file or folder behind,
-interrupted runs included. Each run makes ``<system temp>/gizmo-mcp-<kind>-<checkout hash>/run-<n>``
+interrupted runs included. Each run makes ``<system temp>/board-mcp-<kind>-<checkout hash>/run-<n>``
 and holds a lock on ``.lock`` inside it until the process ends. The kernel drops that lock on any
 death, SIGKILL included, so the next start can tell a dead run's folder from a live one's. A pid
 cannot tell them apart: in another pid namespace a live run's pid looks gone.
@@ -42,7 +42,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
-PACKAGE = "gizmo-mcp"
+PACKAGE = "board-mcp"
 LOCK = ".lock"
 RUN = re.compile(r"run-\d+")
 #: A run's folder before it is locked and renamed.

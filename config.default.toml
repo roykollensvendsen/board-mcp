@@ -1,5 +1,5 @@
-# gizmo-mcp's settings. `claude-voice plugins install` copies this file to
-# ~/.config/gizmo-mcp/config.toml the first time, and never over one that exists.
+# board-mcp's settings. `claude-voice plugins install` copies this file to
+# ~/.config/board-mcp/config.toml the first time, and never over one that exists.
 # Made-up values only: nothing here names a real device, place or person.
 
 [device]

@@ -1,4 +1,4 @@
-"""Everything about the operating system lives in one place, `src/gizmo_mcp/platform/`.
+"""Everything about the operating system lives in one place, `src/board_mcp/platform/`.
 
 claude-voice runs on Linux only today. The rule is that another platform can later be one
 change to that folder, so nothing outside it may name an OS path, a service manager, a package
@@ -19,7 +19,7 @@ import re
 import tomllib
 
 ROOT = pathlib.Path(__file__).parent.parent
-PACKAGE = ROOT / "src" / "gizmo_mcp"
+PACKAGE = ROOT / "src" / "board_mcp"
 PLACE = PACKAGE / "platform"
 MARKS = re.compile(
     r"(?<![\w.])/(?:etc|run/user|proc|sys|dev)(?=/|\b)"
@@ -90,7 +90,7 @@ def test_nothing_outside_the_platform_place_names_the_operating_system():
     for path in _sources():
         sends = device["sends"] if path == PACKAGE / device["file"] else ()
         found += [b for b in breaches(path, sends=sends) if b not in allowed]
-    assert found == [], "move these into src/gizmo_mcp/platform/ and ask it there: " + "; ".join(found)
+    assert found == [], "move these into src/board_mcp/platform/ and ask it there: " + "; ".join(found)
 
 
 def test_the_check_sees_each_kind_of_mark(tmp_path):

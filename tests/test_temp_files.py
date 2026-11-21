@@ -264,7 +264,7 @@ def test_a_killed_test_run_is_swept_at_the_next_start(tmp_path):
     (left / "shut").mkdir()
     (left / "shut" / "inside.txt").write_text("x")
     (left / "shut").chmod(0)  # as a test that took its own folder's rights away would leave it
-    other = base / "gizmo-mcp-tests-00000000"  # another checkout's: never ours to sweep
+    other = base / "board-mcp-tests-00000000"  # another checkout's: never ours to sweep
     other.mkdir()
     done = _run(project, base)
     assert done.returncode == 0, done.stdout

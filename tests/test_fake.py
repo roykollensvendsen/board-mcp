@@ -4,8 +4,8 @@ import asyncio
 
 import pytest
 
-from gizmo_mcp.device import NotSetUpError, SlowDownError, Unconnected, UnreachableError
-from gizmo_mcp.fake import READS_PER_MINUTE, WINDOW, FakeGizmo
+from board_mcp.device import NotSetUpError, SlowDownError, Unconnected, UnreachableError
+from board_mcp.fake import READS_PER_MINUTE, WINDOW, FakeGizmo
 
 
 class _Clock:

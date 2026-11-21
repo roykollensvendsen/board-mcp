@@ -70,8 +70,8 @@ def test_name_for(rule: str) -> str:
 def row_path(rule: dict) -> pathlib.PurePosixPath:
     """Where a rule's row belongs, under ``ROWS``: its file's whole path, then the rule's words.
 
-    A rule named "a read is kept" in ``src/gizmo_mcp/service.py`` goes in
-    ``src/gizmo_mcp/service.py/a-read-is-kept.toml``. The whole path, extension
+    A rule named "a read is kept" in ``src/board_mcp/service.py`` goes in
+    ``src/board_mcp/service.py/a-read-is-kept.toml``. The whole path, extension
     included, is the same layout in every repository and every language, and no
     two source files can share a folder.
     """

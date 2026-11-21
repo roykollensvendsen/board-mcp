@@ -3,7 +3,7 @@
 manifest = 1
 name = "gizmo"
 command = "uv"
-args = ["run", "gizmo-mcp", "serve"]
+args = ["run", "board-mcp", "serve"]
 tools = ["gizmo_status"]
 timeout = 30
 branch = "main"
@@ -12,4 +12,4 @@ uses = []
 
 [config]
 default = "config.default.toml"
-dir = "gizmo-mcp"
+dir = "board-mcp"

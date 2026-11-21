@@ -27,8 +27,8 @@ import pytest
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-from gizmo_mcp.server import TOOLS, build_server
-from gizmo_mcp.service import GizmoService
+from board_mcp.server import TOOLS, build_server
+from board_mcp.service import GizmoService
 
 #: claude-voice's ``plugins.START_SECONDS``. The bridge owns the figure; it is copied here
 #: because the bridge is not a dependency of this package.
@@ -38,11 +38,11 @@ CPU_SECONDS = BRIDGE_START_SECONDS / 2
 #: A loose limit on the clock as well: CPU time misses a start that waits or hangs.
 WALL_SECONDS = 60.0
 SRC = pathlib.Path(__file__).parent.parent / "src"
-#: Starts the server as ``gizmo-mcp serve --simulate`` does, after ``first``.
+#: Starts the server as ``board-mcp serve --simulate`` does, after ``first``.
 LAUNCH = (
     "import runpy, sys\n"
-    "sys.argv = ['gizmo-mcp', 'serve', '--simulate']\n"
-    "runpy.run_module('gizmo_mcp.cli', run_name='__main__')"
+    "sys.argv = ['board-mcp', 'serve', '--simulate']\n"
+    "runpy.run_module('board_mcp.cli', run_name='__main__')"
 )
 
 

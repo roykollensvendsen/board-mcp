@@ -55,7 +55,7 @@ if TYPE_CHECKING:
 ROOT = Path(os.environ.get("RATCHET_ROOT") or Path(__file__).resolve().parent.parent)
 FILE = ROOT / "quality.json"
 SOURCE = ROOT / "src"
-PACKAGE = SOURCE / "gizmo_mcp"
+PACKAGE = SOURCE / "board_mcp"
 COVERAGE_WOBBLE = 0.5  # percentage points: coverage differs slightly between machines and versions
 HIGHER = ("coverage", "mutation", "tests")
 LOWER = ("lint_errors", "type_errors", "cycles", "layer_violations", "duplication")
@@ -233,7 +233,7 @@ def _named(path: Path, package_dir: Path) -> set[str]:
             found |= {alias.name for alias in node.names}
         elif isinstance(node, ast.ImportFrom):
             base = node.module or ""
-            if node.level:  # `from . import x` inside the package is gizmo_mcp.x
+            if node.level:  # `from . import x` inside the package is board_mcp.x
                 base = ".".join([*here[: len(here) - node.level + 1], *filter(None, base.split("."))])
             found |= {f"{base}.{alias.name}" for alias in node.names} | {base}
     return found

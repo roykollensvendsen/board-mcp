@@ -107,9 +107,9 @@ pathlib.Path.write_text = write_text
 def _project(tmp_path):
     """A scratch plugin with one slow rule, and the real mutation run's scripts."""
     project = tmp_path / "project"
-    for folder in ("scripts/mutations/src/pkg/core.py", "src/pkg", "src/gizmo_mcp", "tests"):
+    for folder in ("scripts/mutations/src/pkg/core.py", "src/pkg", "src/board_mcp", "tests"):
         (project / folder).mkdir(parents=True)
-    (project / "src/gizmo_mcp/__init__.py").write_text("")
+    (project / "src/board_mcp/__init__.py").write_text("")
     for name in ("mutate.py", "temproot.py", "own_code.py"):
         shutil.copy(ROOT / "scripts" / name, project / "scripts" / name)
     (project / "src/pkg/core.py").write_text(ORIGINAL)
@@ -138,7 +138,7 @@ def test_a_mutation_run_stopped_by_sigterm_restores_the_file_and_leaves_nothing(
         stdout=subprocess.DEVNULL,
     )
     try:
-        _until(lambda: list(base.glob("gizmo-mcp-mutate-*/run-*/suite-*")), "the run never started a suite")
+        _until(lambda: list(base.glob("board-mcp-mutate-*/run-*/suite-*")), "the run never started a suite")
         assert source.read_text().endswith("X = 2\n"), "the run never switched the rule off"
         run.send_signal(signal.SIGTERM)
         assert run.wait(timeout=30) == 143
@@ -163,7 +163,7 @@ def test_a_mutation_run_stopped_twice_still_puts_its_line_back(tmp_path):
         stdout=subprocess.DEVNULL,
     )
     try:
-        _until(lambda: list(base.glob("gizmo-mcp-mutate-*/run-*/suite-*")), "the run never started a suite")
+        _until(lambda: list(base.glob("board-mcp-mutate-*/run-*/suite-*")), "the run never started a suite")
         run.send_signal(signal.SIGINT)
         _until((project / "src/pkg/restoring").exists, "the run never began to put the line back")
         run.send_signal(signal.SIGINT)

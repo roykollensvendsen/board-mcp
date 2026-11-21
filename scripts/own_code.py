@@ -18,7 +18,7 @@ import subprocess
 import sys
 
 #: The package every check measures.
-MODULE = "gizmo_mcp"
+MODULE = "board_mcp"
 #: What the suite does: src/ first on the path, then the import.
 ASK = f"import sys; sys.path.insert(0, 'src'); import {MODULE}; print({MODULE}.__file__)"
 

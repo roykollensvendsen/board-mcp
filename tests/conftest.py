@@ -1,7 +1,7 @@
 """What every test shares: a private temporary folder, no owner's config, and a guarded recovery file.
 
 **A temporary folder of the run's own.** Before any test, the run makes
-``<system temp>/gizmo-mcp-tests-<checkout hash>/run-<n>`` and points ``TMPDIR``,
+``<system temp>/board-mcp-tests-<checkout hash>/run-<n>`` and points ``TMPDIR``,
 ``tempfile.tempdir`` and pytest's ``--basetemp`` into it, so every subprocess a test starts uses
 it too. At the end it must hold nothing but pytest's own folder: anything else fails the run,
 naming each path and the test file that ran last. Then it is removed. A run that was killed
@@ -117,7 +117,7 @@ def stop_handlers_put_back():
 @pytest.fixture(autouse=True)
 def no_owner_config(tmp_path_factory, monkeypatch):
     """Keep the owner's own config out of the suite; a test that wants one writes its own."""
-    monkeypatch.setenv("GIZMO_MCP_CONFIG", str(tmp_path_factory.mktemp("config") / "none.toml"))
+    monkeypatch.setenv("BOARD_MCP_CONFIG", str(tmp_path_factory.mktemp("config") / "none.toml"))
 
 
 def _now() -> bytes | None:

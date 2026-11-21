@@ -9,10 +9,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from gizmo_mcp.platform.linux import Linux
+from board_mcp.platform.linux import Linux
 
 if TYPE_CHECKING:
-    from gizmo_mcp.platform.base import Platform
+    from board_mcp.platform.base import Platform
 
 
 def current() -> Platform:

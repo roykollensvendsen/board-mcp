@@ -4,8 +4,8 @@ import pathlib
 
 import pytest
 
-from gizmo_mcp import settings
-from gizmo_mcp.platform.linux import Linux
+from board_mcp import settings
+from board_mcp.platform.linux import Linux
 
 ROOT = pathlib.Path(__file__).parent.parent
 
@@ -36,7 +36,7 @@ def test_a_config_that_is_not_toml_says_how_to_fix_it(tmp_path):
 def test_the_config_is_found_in_the_plugin_s_own_folder(monkeypatch, tmp_path):
     monkeypatch.delenv(settings.CONFIG_ENV)
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
-    assert settings.config_file() == tmp_path / "gizmo-mcp" / "config.toml"
+    assert settings.config_file() == tmp_path / "board-mcp" / "config.toml"
     monkeypatch.setenv(settings.CONFIG_ENV, str(tmp_path / "other.toml"))
     assert settings.config_file() == tmp_path / "other.toml"
 

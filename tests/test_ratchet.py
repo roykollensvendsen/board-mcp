@@ -221,7 +221,7 @@ def test_a_cycle_through_a_subpackage_by_absolute_imports_is_counted(tmp_path):
 
 def _layered(tmp_path, files):
     """A package named like this one, so its imports read as they do in src/."""
-    pkg = tmp_path / "gizmo_mcp"
+    pkg = tmp_path / "board_mcp"
     _package(pkg, {"__init__.py": "", **files})
     return pkg
 
@@ -229,18 +229,18 @@ def _layered(tmp_path, files):
 def test_an_import_a_layer_may_not_use_is_a_breach(tmp_path):
     allowed = {
         "device.py": "import json\n",
-        "service.py": "from gizmo_mcp.device import SlowDownError\n",
-        "server.py": "from mcp.types import ToolAnnotations\nfrom gizmo_mcp.service import GizmoService\n",
-        "cli.py": "from gizmo_mcp.server import build_server\n",
+        "service.py": "from board_mcp.device import SlowDownError\n",
+        "server.py": "from mcp.types import ToolAnnotations\nfrom board_mcp.service import GizmoService\n",
+        "cli.py": "from board_mcp.server import build_server\n",
     }
     assert ratchet.layer_breaches(_layered(tmp_path, allowed)) == []
     wrong = {
-        "service.py": "from gizmo_mcp.server import build_server\n",
+        "service.py": "from board_mcp.server import build_server\n",
         "fake.py": "def later():\n    import mcp.types\n",
     }
     assert ratchet.layer_breaches(_layered(tmp_path / "b", {**allowed, **wrong})) == [
         "fake (core) imports mcp.types",
-        "service (core) imports gizmo_mcp.server (top)",
+        "service (core) imports board_mcp.server (top)",
     ]
 
 

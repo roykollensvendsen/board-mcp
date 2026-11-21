@@ -380,7 +380,7 @@ wheels = [
 ]
 
 [[package]]
-name = "gizmo-mcp"
+name = "board-mcp"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

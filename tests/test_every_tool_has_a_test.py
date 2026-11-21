@@ -3,9 +3,9 @@
 import asyncio
 import pathlib
 
-from gizmo_mcp.fake import FakeGizmo
-from gizmo_mcp.server import FIRST_LINE_MAX, TOOLS, build_server
-from gizmo_mcp.service import GizmoService
+from board_mcp.fake import FakeGizmo
+from board_mcp.server import FIRST_LINE_MAX, TOOLS, build_server
+from board_mcp.service import GizmoService
 
 TESTS = pathlib.Path(__file__).parent
 

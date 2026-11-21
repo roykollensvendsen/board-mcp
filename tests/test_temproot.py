@@ -250,6 +250,6 @@ def test_removing_never_changes_a_folder_a_link_points_to(tmp_path):
 def test_each_checkout_and_kind_has_a_parent_of_its_own(tmp_path):
     one = temproot.parent_for("tests", tmp_path / "a", base=tmp_path)
     assert one.parent == tmp_path
-    assert one.name.startswith("gizmo-mcp-tests-")
+    assert one.name.startswith("board-mcp-tests-")
     assert one != temproot.parent_for("tests", tmp_path / "b", base=tmp_path)
     assert one != temproot.parent_for("mutate", tmp_path / "a", base=tmp_path)

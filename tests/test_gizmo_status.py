@@ -6,10 +6,10 @@ Every new tool gets a file like this one, named after it (tests/test_every_tool_
 
 import asyncio
 
-from gizmo_mcp.device import NotSetUpError
-from gizmo_mcp.fake import READS_PER_MINUTE, FakeGizmo
-from gizmo_mcp.server import build_server
-from gizmo_mcp.service import BROKE, NOT_SET_UP, UNREACHABLE, GizmoService
+from board_mcp.device import NotSetUpError
+from board_mcp.fake import READS_PER_MINUTE, FakeGizmo
+from board_mcp.server import build_server
+from board_mcp.service import BROKE, NOT_SET_UP, UNREACHABLE, GizmoService
 
 
 def _call(gizmo, *, simulated=False):

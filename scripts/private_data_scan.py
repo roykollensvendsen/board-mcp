@@ -11,7 +11,7 @@ for commit), on a commit message, or on the whole history:
 - no link to a Claude session, which points into one person's account;
 - no word from the owner's own private list, such as a device's own name.
 
-The private list is ``~/.config/gizmo-mcp/private.toml``, holding ``words = ["...", ...]``.
+The private list is ``~/.config/board-mcp/private.toml``, holding ``words = ["...", ...]``.
 It lives outside the repository, so the list itself is never published, and it is optional:
 with no file there, that check is skipped. A list that is there and cannot be read refuses the
 commit instead, since a broken list would otherwise check nothing and look like a pass.
@@ -35,7 +35,7 @@ import sys
 import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-WORDS = pathlib.Path("~/.config/gizmo-mcp/private.toml")
+WORDS = pathlib.Path("~/.config/board-mcp/private.toml")
 #: Shorter words would match ordinary text.
 MIN_WORD = 4
 

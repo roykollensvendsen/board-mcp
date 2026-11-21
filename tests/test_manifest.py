@@ -13,8 +13,8 @@ import tomllib
 import jsonschema
 import pytest
 
-from gizmo_mcp import settings
-from gizmo_mcp.server import TOOLS
+from board_mcp import settings
+from board_mcp.server import TOOLS
 
 ROOT = pathlib.Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))

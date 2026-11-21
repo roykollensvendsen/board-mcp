@@ -11,7 +11,7 @@ from mcp.server.mcpserver import MCPServer
 from mcp.types import ToolAnnotations
 
 if TYPE_CHECKING:
-    from gizmo_mcp.service import GizmoService
+    from board_mcp.service import GizmoService
 
 #: The Claude app shows a tool by the start of its description, cut at this many characters.
 FIRST_LINE_MAX = 78

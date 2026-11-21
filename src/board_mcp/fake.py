@@ -12,7 +12,7 @@ from __future__ import annotations
 import time
 from typing import TYPE_CHECKING
 
-from gizmo_mcp.device import Reading, SlowDownError, UnreachableError
+from board_mcp.device import Reading, SlowDownError, UnreachableError
 
 if TYPE_CHECKING:
     from collections.abc import Callable
