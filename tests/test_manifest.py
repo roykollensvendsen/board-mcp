@@ -60,6 +60,40 @@ def test_the_manifest_names_the_config_folder_the_plugin_reads():
     assert (ROOT / config["default"]).is_file()
 
 
+def _default_config():
+    return tomllib.loads((ROOT / _manifest()["config"]["default"]).read_text(encoding="utf-8"))
+
+
+def test_install_asks_whose_board_and_its_number():
+    personal = {field["key"]: field for field in _manifest()["config"]["personal"]}
+    assert sorted(personal) == ["board.number", "board.owner", "board.owner_kind"]
+    board = _default_config()["board"]
+    for key in personal:
+        assert key.removeprefix("board.") in board, f"{key} is asked but the default config has no such key"
+    assert personal["board.owner_kind"]["values"] == sorted(settings.OWNER_KINDS)
+
+
+def test_the_answers_install_asks_for_are_accepted_by_the_plugin(tmp_path):
+    """The longest login GitHub allows and the highest number asked both load as settings."""
+    personal = {field["key"]: field for field in _manifest()["config"]["personal"]}
+    login = "a" * personal["board.owner"]["max_len"]
+    highest = personal["board.number"]["range"][1]
+    config = tmp_path / "config.toml"
+    config.write_text(f'[board]\nowner_kind = "organization"\nowner = "{login}"\nnumber = {highest}\n')
+    loaded = settings.load(config)
+    assert (loaded.owner_kind, loaded.owner, loaded.number) == ("organization", login, highest)
+
+
+def test_an_installed_config_reads_the_real_board():
+    """Install fills in the owner's board, so the copy it writes asks GitHub, not the fake."""
+    assert _default_config()["board"]["simulate"] is False
+
+
+def test_the_secrets_step_enters_the_key_where_the_plugin_reads_it():
+    where = f"~/.config/{settings.CONFIG_DIR}/{settings.Settings().token_file}"
+    assert _manifest()["secrets_step"] == f"secret-box {where}"
+
+
 def test_the_default_config_holds_made_up_values_only():
     text = (ROOT / _manifest()["config"]["default"]).read_text(encoding="utf-8")
     assert private_data_scan.offences(text, set()) == []

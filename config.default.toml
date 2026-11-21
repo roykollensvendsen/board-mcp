@@ -18,5 +18,6 @@ done = ["Done"]
 class_field = "Class"
 # The classes, highest priority first. An item with no class, or another one, comes last.
 class_order = ["Owner request", "Bug", "Idea"]
-# Answer from the made-up board in fake.py instead of GitHub.
-simulate = true
+# Answer from the made-up board in fake.py instead of GitHub. Install asks for the real board
+# above, so the copy it writes reads GitHub; `board-mcp list --simulate` still answers from the fake.
+simulate = false

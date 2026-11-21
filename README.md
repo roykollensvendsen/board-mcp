@@ -36,7 +36,9 @@ claude-voice plugins install board --from <this folder>
 ```
 
 It reads `claude-voice-plugin.toml`, writes `config.default.toml` as your first config, and
-ends with the usual typed-name approval.
+ends with the usual typed-name approval. On the way it asks whose board it is and its number,
+and writes your answers into that config. It never asks for the key: its summary names the
+secret-box line to run for that.
 
 ## What is where
 
