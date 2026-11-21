@@ -9,7 +9,9 @@ It only reads. The board mirrors the work, so reading it starts, stops or change
 ## The key
 
 It reads the board with a classic GitHub token that has only the `read:project` right, and no
-`repo` right. Fine-grained tokens can't reach a project owned by a user account yet. Enter the
+`repo` right. Fine-grained tokens can't reach a project owned by a user account yet. A classic
+token reads every project the account can see, and never expires unless told to, so give it an
+expiry, such as 90 days. When GitHub refuses it, make a new one with the same single right. Enter the
 key with secret-box, into the file `token_file` names in the plugin's config folder. It is read
 from there and nowhere else, and never logged. Without the `repo` right, an item from a private
 repository is read out as "a private item", with no title.

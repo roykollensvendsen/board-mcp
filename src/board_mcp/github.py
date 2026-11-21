@@ -36,9 +36,13 @@ PAGE = 100
 MOST_PAGES = 10
 TIMEOUT = 10.0
 AGENT = "board-mcp/0.1"
+#: A GraphQL query reads; changing the board would need a mutation, which this plugin never sends.
+# RULE: it only reads
+OPERATION = "query"
 #: The owner field is filled in from the config's owner_kind, which is only ever user or organization.
-QUERY = """
-query Board($login: String!, $number: Int!, $first: Int!, $after: String, $status: String!, $class: String!) {
+QUERY = (
+    OPERATION
+    + """ Board($login: String!, $number: Int!, $first: Int!, $after: String, $status: String!, $class: String!) {
   owner: __OWNER__(login: $login) {
     projectV2(number: $number) {
       items(first: $first, after: $after, orderBy: {field: POSITION, direction: ASC}) {
@@ -56,6 +60,7 @@ query Board($login: String!, $number: Int!, $first: Int!, $after: String, $statu
   }
 }
 """
+)
 
 
 def query(owner_kind: str) -> str:

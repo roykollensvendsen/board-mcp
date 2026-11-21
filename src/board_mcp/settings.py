@@ -24,8 +24,8 @@ CONFIG_DIR = "board-mcp"
 CONFIG_ENV = "BOARD_MCP_CONFIG"
 OWNER_KINDS = ("user", "organization")
 ENTER_KEY = (
-    "no GitHub key is set up; enter a classic token with only the read:project right "
-    "with secret-box, as the file named by token_file in board-mcp's config folder"
+    "no GitHub key is set up; make a classic token with only the read:project right and an expiry, "
+    "and enter it with secret-box, as the file named by token_file in board-mcp's config folder"
 )
 
 
@@ -80,6 +80,7 @@ def load(path: pathlib.Path | None = None) -> Settings:
 
 
 def _checked(path: pathlib.Path, loaded: Settings) -> Settings:
+    # RULE: only a user or organization owner kind reaches the query
     if loaded.owner_kind not in OWNER_KINDS:
         msg = f"{path}: owner_kind is {loaded.owner_kind!r}; it must be user or organization"
         raise SettingsError(msg)

@@ -7,6 +7,7 @@ import pytest
 from board_mcp import settings
 from board_mcp.device import NotSetUpError
 from board_mcp.platform.linux import Linux
+from board_mcp.service import NOT_SET_UP
 
 ROOT = pathlib.Path(__file__).parent.parent
 
@@ -44,6 +45,21 @@ def test_an_owner_kind_github_does_not_have_is_refused(tmp_path):
     path.write_text('[board]\nowner_kind = "team"\n')
     with pytest.raises(settings.SettingsError, match="user or organization"):
         settings.load(path)
+
+
+def test_only_a_user_or_organization_owner_kind_reaches_the_query(tmp_path):
+    """owner_kind is pasted into the query's text, so anything else could add to the query."""
+    path = tmp_path / "config.toml"
+    path.write_text('[board]\nowner_kind = "user(login: \\"x\\") { id } other: user"\n')
+    with pytest.raises(settings.SettingsError, match="user or organization"):
+        settings.load(path)
+
+
+def test_the_key_advice_says_to_set_an_expiry():
+    """A classic token never expires unless told to, and it reads every board the account sees."""
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    for advice in (settings.ENTER_KEY, NOT_SET_UP, readme):
+        assert "expiry" in advice
 
 
 def test_a_config_that_is_not_toml_says_how_to_fix_it(tmp_path):
