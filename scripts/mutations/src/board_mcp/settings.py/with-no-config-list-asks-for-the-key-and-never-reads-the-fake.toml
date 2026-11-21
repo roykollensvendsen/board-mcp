@@ -1,0 +1,5 @@
+[[rule]]
+name = "with no config list asks for the key and never reads the fake"
+file = "src/board_mcp/settings.py"
+find = 'simulate: bool = False'
+replace = 'simulate: bool = True'

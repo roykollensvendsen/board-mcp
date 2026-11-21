@@ -9,7 +9,29 @@ timeout = 30
 branch = "main"
 # Add "home" here when the plugin needs a position; it then reads home_file, never a copy.
 uses = []
+# The key is never asked by install: the owner enters it with this, and install only names it.
+secrets_step = "secret-box ~/.config/board-mcp/github-token"
 
 [config]
 default = "config.default.toml"
 dir = "board-mcp"
+
+# Whose board it is, asked at install and written into the copied config.
+[[config.personal]]
+key = "board.owner_kind"
+type = "choice"
+values = ["organization", "user"]
+ask = "Is the board owned by a user or an organization?"
+
+[[config.personal]]
+key = "board.owner"
+type = "str"
+# GitHub's longest login.
+max_len = 39
+ask = "Which GitHub login owns the board?"
+
+[[config.personal]]
+key = "board.number"
+type = "int"
+range = [1, 100000]
+ask = "What is the board's number, as in its address on GitHub?"

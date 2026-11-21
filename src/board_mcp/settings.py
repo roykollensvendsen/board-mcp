@@ -45,7 +45,8 @@ class Settings:
     done: tuple[str, ...] = ("Done",)
     class_field: str = "Class"
     class_order: tuple[str, ...] = ("Owner request", "Bug", "Idea")
-    simulate: bool = True
+    # RULE: with no config list asks for the key and never reads the fake
+    simulate: bool = False
 
 
 KEYS = {field.name: field.default for field in dataclasses.fields(Settings)}
