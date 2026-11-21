@@ -3,15 +3,20 @@
 import asyncio
 import pathlib
 
-from board_mcp.fake import FakeGizmo
 from board_mcp.server import FIRST_LINE_MAX, TOOLS, build_server
-from board_mcp.service import GizmoService
+from board_mcp.service import BoardService
+from board_mcp.settings import Settings
 
 TESTS = pathlib.Path(__file__).parent
 
 
+class _Unasked:
+    async def items(self):
+        raise AssertionError
+
+
 def _tools():
-    return {tool.name: tool for tool in asyncio.run(build_server(GizmoService(FakeGizmo())).list_tools())}
+    return {tool.name: tool for tool in asyncio.run(build_server(BoardService(_Unasked(), Settings())).list_tools())}
 
 
 def test_every_tool_has_a_test_file_named_after_it():

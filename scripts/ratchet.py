@@ -66,9 +66,9 @@ NEW_MODULE_CEILING = 15  # the most tangled function a new module may have
 BLOCK = 6  # lines in a row that count as a copied block
 EXCEPTION = re.compile(r"^\s*ratchet-exception:\s*([a-z_]+)", re.IGNORECASE | re.MULTILINE)
 TALLY = re.compile(r"(\d+)/(\d+) rules turned off")
-#: The layers, lowest first. The core asks the gizmo and words the answers, and knows no MCP;
+#: The layers, lowest first. The core reads the board and words the answers, and knows no MCP;
 #: only the top, the server and the command line, knows MCP and puts the core together.
-CORE = {"__init__", "device", "fake", "service", "settings", "platform", "platform.base", "platform.linux"}
+CORE = {"__init__", "device", "fake", "github", "service", "settings", "platform", "platform.base", "platform.linux"}
 TOP = {"server", "cli"}
 #: Which layers each layer may import from this package, and the outside packages it never may.
 ALLOWED = {

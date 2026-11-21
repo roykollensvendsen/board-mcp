@@ -1,7 +1,18 @@
 # board-mcp
 
-A made-up gizmo, read by voice. This is an MCP server that a voice assistant reaches through
-claude-voice, as one of its plugins.
+A GitHub project board, read by voice. This is an MCP server that a voice assistant reaches
+through claude-voice, as one of its plugins. Ask "what's on the board?" and it reads the open
+items, highest priority first.
+
+It only reads. The board mirrors the work, so reading it starts, stops or changes nothing.
+
+## The key
+
+It reads the board with a classic GitHub token that has only the `read:project` right, and no
+`repo` right. Fine-grained tokens can't reach a project owned by a user account yet. Enter the
+key with secret-box, into the file `token_file` names in the plugin's config folder. It is read
+from there and nowhere else, and never logged. Without the `repo` right, an item from a private
+repository is read out as "a private item", with no title.
 
 It started from claude-voice's plugin template. The guide for writing one is
 `docs/write-a-plugin.md` in claude-voice, and `docs/plugin-standard.md` there holds the rules.
@@ -11,16 +22,17 @@ It started from claude-voice's plugin template. The guide for writing one is
 <!-- not run: it needs the project installed, which `just setup` does -->
 ```
 just setup
-uv run board-mcp status --simulate
+uv run board-mcp list --simulate
 ```
 
-The second line prints what the voice would hear, from the made-up gizmo in `fake.py`.
+The second line prints what the voice would hear, from the made-up board behind the fake GitHub
+in `fake.py`.
 
 ## Install it in claude-voice
 
 <!-- not run: it changes the owner's own bridge config, and asks in a terminal -->
 ```
-claude-voice plugins install gizmo --from <this folder>
+claude-voice plugins install board --from <this folder>
 ```
 
 It reads `claude-voice-plugin.toml`, writes `config.default.toml` as your first config, and
@@ -31,10 +43,11 @@ ends with the usual typed-name approval.
 | Part | What it is for |
 |---|---|
 | `src/board_mcp/server.py` | The MCP tools. Each answer carries a `say`, the sentence the voice reads aloud. |
-| `src/board_mcp/service.py` | The core: it asks the gizmo and words every answer, failures included. |
-| `src/board_mcp/device.py` | What the service needs from a gizmo. A real adapter answers it. |
-| `src/board_mcp/fake.py` | A made-up gizmo that refuses what the real one refuses. |
-| `src/board_mcp/settings.py` | The plugin's own config, from its own folder. |
+| `src/board_mcp/service.py` | The core: it orders the board and words every answer, failures included. |
+| `src/board_mcp/device.py` | What the service needs from a board, and the ways reading one fails. |
+| `src/board_mcp/github.py` | The real board, read through GitHub's GraphQL API. |
+| `src/board_mcp/fake.py` | A made-up GitHub that refuses what the real one refuses. |
+| `src/board_mcp/settings.py` | The plugin's own config and key, from its own folder. |
 | `src/board_mcp/platform/` | The one place that knows the operating system. |
 | `scripts/ratchet.py` | The quality levels, which may never get worse than main's. |
 | `scripts/mutate.py` | Switches each rule off in turn, to prove its test can fail. |

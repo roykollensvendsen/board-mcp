@@ -1,0 +1,5 @@
+[[rule]]
+name = "a private item is said without its title"
+file = "src/board_mcp/service.py"
+find = 'name = PRIVATE if item\.title is None else item\.title'
+replace = 'name = str(item.title)  # switched off'

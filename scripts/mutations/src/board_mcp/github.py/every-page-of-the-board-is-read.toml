@@ -1,0 +1,5 @@
+[[rule]]
+name = "every page of the board is read"
+file = "src/board_mcp/github.py"
+find = 'if not page\["pageInfo"\]\["hasNextPage"\]:'
+replace = 'if True:  # switched off'

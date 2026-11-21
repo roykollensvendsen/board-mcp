@@ -1,9 +1,22 @@
 # board-mcp's settings. `claude-voice plugins install` copies this file to
 # ~/.config/board-mcp/config.toml the first time, and never over one that exists.
-# Made-up values only: nothing here names a real device, place or person.
+# Made-up values only: nothing here names a real account, board or person.
 
-[device]
-# The gizmo's address on your network. The made-up default reaches nothing.
-address = "gizmo.example.invalid"
-# Answer from the made-up gizmo in fake.py instead of a real one.
+[board]
+# Whose board: "user" or "organization", and its login on GitHub.
+owner_kind = "user"
+owner = "example-owner"
+# The board's number, as in its address: github.com/users/<owner>/projects/<number>.
+number = 1
+# The file in this folder that holds the GitHub key. Enter the key with secret-box: a classic
+# token with only the read:project right. It is read from this folder and nowhere else.
+token_file = "github-token"
+# The board's single-select fields for status and class, as named on the board.
+status_field = "Status"
+# Items with these statuses are finished, and left out of the list.
+done = ["Done"]
+class_field = "Class"
+# The classes, highest priority first. An item with no class, or another one, comes last.
+class_order = ["Owner request", "Bug", "Idea"]
+# Answer from the made-up board in fake.py instead of GitHub.
 simulate = true

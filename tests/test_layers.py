@@ -1,6 +1,6 @@
 """The layers: the core, then the server and the command line.
 
-The core asks the gizmo and words the answers; it knows no MCP. Only the server and
+The core reads the board and words the answers; it knows no MCP. Only the server and
 the command line know MCP and put the core together. Every import,
 including those made only for type checking or inside a function, is counted.
 

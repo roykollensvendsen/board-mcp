@@ -3,26 +3,27 @@
 import pytest
 
 from board_mcp import cli
+from board_mcp.service import NOT_SET_UP
 
 
-def test_status_says_what_the_voice_would_hear(capsys):
-    assert cli.main(["status", "--simulate"]) == 0
-    assert capsys.readouterr().out == "Simulated: The gizmo is on, at level 40.\n"
+def test_list_says_what_the_voice_would_hear(capsys):
+    assert cli.main(["list", "--simulate"]) == 0
+    assert capsys.readouterr().out.startswith("Simulated: The board has 4 open items. 1: ")
 
 
-def test_with_no_real_gizmo_set_up_status_says_so(tmp_path, monkeypatch, capsys):
+def test_with_no_token_set_up_list_says_how_to_enter_one(tmp_path, monkeypatch, capsys):
     config = tmp_path / "config.toml"
-    config.write_text("[device]\nsimulate = false\n")
+    config.write_text("[board]\nsimulate = false\n")
     monkeypatch.setenv("BOARD_MCP_CONFIG", str(config))
-    assert cli.main(["status"]) == 0
-    assert capsys.readouterr().out == "No real gizmo is set up yet, so nothing was asked.\n"
+    assert cli.main(["list"]) == 0
+    assert capsys.readouterr().out == NOT_SET_UP + "\n"
 
 
 def test_a_broken_config_stops_the_command_with_the_fix(tmp_path, monkeypatch, capsys):
     config = tmp_path / "config.toml"
-    config.write_text("[device\n")
+    config.write_text("[board\n")
     monkeypatch.setenv("BOARD_MCP_CONFIG", str(config))
-    assert cli.main(["status"]) == 2
+    assert cli.main(["list"]) == 2
     assert "delete it to use the defaults" in capsys.readouterr().err
 
 

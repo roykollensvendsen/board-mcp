@@ -1,0 +1,5 @@
+[[rule]]
+name = "the list stops at the limit and says how many more"
+file = "src/board_mcp/service.py"
+find = 'more = \[f"And \{count - limit\} more\."\]'
+replace = 'more: list[str] = []  # switched off'

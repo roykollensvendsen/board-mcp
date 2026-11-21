@@ -1,5 +1,5 @@
 [[rule]]
-name = "every answer has a sentence to say even when the gizmo fails"
+name = "every answer has a sentence to say even when github fails"
 file = "src/board_mcp/service.py"
 find = 'except Exception:  # noqa: BLE001'
 replace = 'except ZeroDivisionError:  # switched off'

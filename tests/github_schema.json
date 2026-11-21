@@ -1,0 +1,19 @@
+{
+  "read_on": "2026-11-21",
+  "how": "GitHub's GraphQL introspection, names only: no board, login or item was read",
+  "ProjectV2ItemType": ["ISSUE", "PULL_REQUEST", "DRAFT_ISSUE", "REDACTED"],
+  "ProjectV2ItemOrderField": ["POSITION"],
+  "ProjectV2ItemOrder": ["field", "direction"],
+  "OrderDirection": ["ASC", "DESC"],
+  "ProjectV2Item": [
+    "content", "createdAt", "creator", "fieldValueByName", "fieldValues", "fullDatabaseId", "id",
+    "isArchived", "project", "type", "updatedAt"
+  ],
+  "ProjectV2ItemFieldSingleSelectValue": [
+    "color", "createdAt", "creator", "databaseId", "description", "descriptionHTML", "field", "id",
+    "item", "name", "nameHTML", "optionId", "updatedAt"
+  ],
+  "ProjectV2ItemConnection": ["edges", "nodes", "pageInfo", "totalCount"],
+  "ProjectV2.items": ["after", "before", "first", "last", "orderBy", "archivedStates", "query"],
+  "User.projectV2": true
+}

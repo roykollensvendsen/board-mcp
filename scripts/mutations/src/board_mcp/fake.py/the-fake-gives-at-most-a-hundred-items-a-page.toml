@@ -1,0 +1,5 @@
+[[rule]]
+name = "the fake gives at most a hundred items a page"
+file = "src/board_mcp/fake.py"
+find = 'if first > PAGE_MOST:'
+replace = 'if False:  # switched off'

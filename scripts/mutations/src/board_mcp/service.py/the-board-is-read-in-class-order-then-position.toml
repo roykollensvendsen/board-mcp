@@ -1,0 +1,5 @@
+[[rule]]
+name = "the board is read in class order then position"
+file = "src/board_mcp/service.py"
+find = 'return sorted\(shown, key=lambda item'
+replace = 'return shown  # switched off'

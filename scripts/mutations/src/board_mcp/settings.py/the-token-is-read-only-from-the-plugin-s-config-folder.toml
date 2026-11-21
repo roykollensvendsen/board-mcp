@@ -1,0 +1,5 @@
+[[rule]]
+name = "the token is read only from the plugin's config folder"
+file = "src/board_mcp/settings.py"
+find = 'if not name or name\.startswith\("\."\)'
+replace = 'if False:  # switched off'

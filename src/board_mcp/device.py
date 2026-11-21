@@ -1,7 +1,8 @@
-"""What the plugin needs from a gizmo, and the ways asking one can fail.
+"""What the plugin needs from a board, and the ways asking for one can fail.
 
-The service talks to this and nothing else. The fake (`fake.py`) and the real adapter both
-answer it, so every test runs through the same door the real device does.
+The service talks to this and nothing else. The GitHub adapter (`github.py`) answers it, and in
+tests it talks to the fake GitHub (`fake.py`), so every test runs through the same door the real
+board does.
 """
 
 from __future__ import annotations
@@ -11,15 +12,15 @@ from typing import Protocol
 
 
 class DeviceError(Exception):
-    """Asking the gizmo failed; each kind below is said to the voice in its own words."""
+    """Asking for the board failed; each kind below is said to the voice in its own words."""
 
 
 class UnreachableError(DeviceError):
-    """The gizmo did not answer in time."""
+    """GitHub did not answer in time, or answered with a fault of its own."""
 
 
 class SlowDownError(DeviceError):
-    """The gizmo refuses to be asked again so soon."""
+    """GitHub asks for a pause before the next request."""
 
     def __init__(self, seconds: float) -> None:
         """Keep how long to wait, so the voice can say it."""
@@ -28,29 +29,38 @@ class SlowDownError(DeviceError):
 
 
 class NotSetUpError(DeviceError):
-    """No real gizmo is set up, so nothing was asked."""
+    """No key for GitHub is set up, so nothing was asked."""
+
+
+class KeyRefusedError(DeviceError):
+    """GitHub refused the key: it is wrong, revoked or out of date."""
+
+
+class NoRightError(DeviceError):
+    """The key lacks the right to read projects."""
+
+
+class NotFoundError(DeviceError):
+    """GitHub has no such board, or the key cannot see it."""
 
 
 @dataclass(frozen=True)
-class Reading:
-    """What the gizmo says about itself: whether it is on, and its level from 0 to 100."""
+class Item:
+    """One item on the board, as read.
 
-    on: bool
-    level: int
+    `title` is None for an item the key may not see. `position` is its place on the board,
+    counted from 0 in GitHub's own order.
+    """
+
+    title: str | None
+    status: str | None
+    klass: str | None
+    position: int
 
 
-class Gizmo(Protocol):
-    """A gizmo the plugin can read."""
+class Board(Protocol):
+    """A board the plugin can read."""
 
-    async def read(self) -> Reading:
-        """The gizmo's state now."""
+    async def items(self) -> list[Item]:
+        """Every item on the board now, in its own order, archived ones left out."""
         ...
-
-
-class Unconnected:
-    """The real gizmo, until an adapter for it is written: every read says so."""
-
-    async def read(self) -> Reading:
-        """Refuse, naming the next step."""
-        msg = "no adapter for a real gizmo is written yet; run with --simulate"
-        raise NotSetUpError(msg)

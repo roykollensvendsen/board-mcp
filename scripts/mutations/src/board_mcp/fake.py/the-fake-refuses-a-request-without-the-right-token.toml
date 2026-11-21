@@ -1,0 +1,5 @@
+[[rule]]
+name = "the fake refuses a request without the right token"
+file = "src/board_mcp/fake.py"
+find = 'if request\.headers\.get\("authorization"\) != f"Bearer \{self\.token\}":'
+replace = 'if False:  # switched off'

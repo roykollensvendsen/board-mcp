@@ -8,7 +8,7 @@ update.
 The time that counts is the server's own CPU time, not the clock: on a busy machine the
 clock measures the other work too, and a test on it failed with no change to the code. A
 start that waits instead of working costs no CPU, so two more tests close that gap: listing
-the tools asks the gizmo nothing, and no code sleeps. A loose limit on the clock, 60 s, ends a
+the tools asks the board nothing, and no code sleeps. A loose limit on the clock, 60 s, ends a
 start that hangs. The bridge's own 15 s limit is on the clock, in real use.
 
 These tests count the CPU of every child process this one waited for, so they assume the
@@ -28,7 +28,8 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 from board_mcp.server import TOOLS, build_server
-from board_mcp.service import GizmoService
+from board_mcp.service import BoardService
+from board_mcp.settings import Settings
 
 #: claude-voice's ``plugins.START_SECONDS``. The bridge owns the figure; it is copied here
 #: because the bridge is not a dependency of this package.
@@ -105,28 +106,29 @@ def test_a_heavy_start_is_caught_by_the_cpu_it_uses(tmp_path):
 
 
 class _Recording:
-    """A gizmo that keeps every read and answers none."""
+    """A board that keeps every read and answers none."""
 
     def __init__(self):
         self.asked = 0
 
-    async def read(self):
+    async def items(self):
         self.asked += 1
         raise OSError
 
 
-def test_listing_the_tools_asks_the_gizmo_nothing():
-    """A start that waited on the device would cost no CPU, so it is refused here instead."""
-    gizmo = _Recording()
-    assert sorted(t.name for t in asyncio.run(build_server(GizmoService(gizmo)).list_tools())) == sorted(TOOLS)
-    assert gizmo.asked == 0
+def test_listing_the_tools_asks_the_board_nothing():
+    """A start that waited on GitHub would cost no CPU, so it is refused here instead."""
+    board = _Recording()
+    listed = asyncio.run(build_server(BoardService(board, Settings())).list_tools())
+    assert sorted(t.name for t in listed) == sorted(TOOLS)
+    assert board.asked == 0
 
 
-def test_a_read_is_seen_by_the_recording_gizmo():
-    """Proof the check above can fail: asking a tool does reach the gizmo."""
-    gizmo = _Recording()
-    asyncio.run(build_server(GizmoService(gizmo)).call_tool("gizmo_status", {}))
-    assert gizmo.asked == 1
+def test_a_read_is_seen_by_the_recording_board():
+    """Proof the check above can fail: asking a tool does reach the board."""
+    board = _Recording()
+    asyncio.run(build_server(BoardService(board, Settings())).call_tool("board_list", {}))
+    assert board.asked == 1
 
 
 def test_no_code_sleeps():

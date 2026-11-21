@@ -1,1 +1,1 @@
-"""board-mcp: a made-up gizmo, read by voice through claude-voice."""
+"""board-mcp: a GitHub project board, read by voice through claude-voice."""

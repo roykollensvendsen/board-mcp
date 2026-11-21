@@ -63,4 +63,4 @@ def test_the_manifest_names_the_config_folder_the_plugin_reads():
 def test_the_default_config_holds_made_up_values_only():
     text = (ROOT / _manifest()["config"]["default"]).read_text(encoding="utf-8")
     assert private_data_scan.offences(text, set()) == []
-    assert ".invalid" in text, "a made-up address ends in .invalid, so it can never reach a real host"
+    assert 'owner = "example-owner"' in text, "the shipped owner is made up, so it names no real account"

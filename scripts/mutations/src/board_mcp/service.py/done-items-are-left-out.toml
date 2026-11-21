@@ -1,0 +1,5 @@
+[[rule]]
+name = "done items are left out"
+file = "src/board_mcp/service.py"
+find = 'shown = \[item for item in items if item\.status not in self\._rules\.done\]'
+replace = 'shown = list(items)  # switched off'

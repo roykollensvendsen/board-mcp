@@ -1,0 +1,5 @@
+[[rule]]
+name = "archived items are left out"
+file = "src/board_mcp/github.py"
+find = 'if node\["isArchived"\]:'
+replace = 'if False:  # switched off'

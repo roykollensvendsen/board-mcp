@@ -5,10 +5,10 @@ build-backend = "hatchling.build"
 [project]
 name = "board-mcp"
 version = "0.1.0"
-description = "A made-up gizmo, read by voice: an MCP server and claude-voice plugin."
+description = "A GitHub project board, read by voice: an MCP server and claude-voice plugin."
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["mcp>=2.3"]
+dependencies = ["httpx2>=2.16", "mcp>=2.3"]
 
 [project.scripts]
 board-mcp = "board_mcp.cli:main"
