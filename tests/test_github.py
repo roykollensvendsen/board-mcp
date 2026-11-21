@@ -64,6 +64,23 @@ def test_an_error_github_gives_no_type_for_is_named_and_fails():
         _read(answer)
 
 
+def test_it_only_reads():
+    """Every request GitHub gets is a query; a change to the board would need a mutation."""
+    github = FakeGitHub([FakeItem(f"Job {n}", "Todo") for n in range(PAGE + 1)])
+    sent = []
+
+    def watched(request):
+        sent.append(json.loads(request.content)["query"])
+        return github(request)
+
+    board = GitHubBoard(Settings(), lambda: SAMPLE_TOKEN, transport=httpx2.MockTransport(watched))
+    asyncio.run(board.items())
+    assert len(sent) == 2
+    for text in sent:
+        assert text.lstrip().startswith("query "), text[:40]
+        assert "mutation" not in text
+
+
 def test_a_board_past_the_page_cap_is_read_only_that_far():
     """A runaway cursor never loops for ever: ten pages, then the items read so far."""
     github = FakeGitHub([FakeItem(f"Job {n}", "Todo") for n in range(PAGE * MOST_PAGES + 5)])

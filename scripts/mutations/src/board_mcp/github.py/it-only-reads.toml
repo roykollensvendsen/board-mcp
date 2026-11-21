@@ -1,0 +1,5 @@
+[[rule]]
+name = "it only reads"
+file = "src/board_mcp/github.py"
+find = 'OPERATION = "query"'
+replace = 'OPERATION = "mutation"'

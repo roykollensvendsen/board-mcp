@@ -29,8 +29,8 @@ MOST = 50
 PRIVATE = "a private item"
 UNREACHABLE = "GitHub isn't answering. Try again in a minute."
 NOT_SET_UP = (
-    "No GitHub key is set up for the board yet. Make a classic token with only the read:project right, "
-    "and enter it with secret-box into board-mcp's config folder."
+    "No GitHub key is set up for the board yet. Make a classic token with only the read:project right "
+    "and an expiry, and enter it with secret-box into board-mcp's config folder."
 )
 KEY_REFUSED = "GitHub refused the board key. It may have run out; make a new one and enter it with secret-box."
 NO_RIGHT = "The board key lacks the read:project right. Make a new one with that right, and enter it with secret-box."
