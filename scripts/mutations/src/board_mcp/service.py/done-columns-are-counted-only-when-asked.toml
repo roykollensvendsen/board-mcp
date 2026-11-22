@@ -1,0 +1,5 @@
+[[rule]]
+name = "done columns are counted only when asked"
+file = "src/board_mcp/service.py"
+find = 'if item\.status in self\._rules\.done and not include_done:'
+replace = 'if False:  # switched off'

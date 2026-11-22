@@ -2,12 +2,15 @@
 
 It only reads. It asks for each item's title, its type, whether it is archived, and the two
 single-select fields the config names (status and class), a hundred items a page in the board's
-own order. An item the key may not see comes back typed REDACTED, with no content, and is kept
-with no title. No title or key is ever logged.
+own order. The status value's updatedAt is when it last changed, which GitHub keeps for every
+move, by hand or not; that is the time in a column, and nothing else records it. An item the
+key may not see comes back typed REDACTED, with no content, and is kept with no title. No title
+or key is ever logged.
 """
 
 from __future__ import annotations
 
+import datetime as dt
 import math
 import time
 from typing import TYPE_CHECKING, Any
@@ -52,7 +55,7 @@ QUERY = (
           type
           isArchived
           content { ... on Issue { title } ... on PullRequest { title } ... on DraftIssue { title } }
-          status: fieldValueByName(name: $status) { ... on ProjectV2ItemFieldSingleSelectValue { name } }
+          status: fieldValueByName(name: $status) { ... on ProjectV2ItemFieldSingleSelectValue { name updatedAt } }
           class: fieldValueByName(name: $class) { ... on ProjectV2ItemFieldSingleSelectValue { name } }
         }
       }
@@ -162,8 +165,22 @@ def _item(node: dict[str, Any], position: int) -> Item | None:
         return None
     content = node.get("content") or {}
     title = None if node["type"] == "REDACTED" else content.get("title")
-    return Item(title=title, status=_name(node.get("status")), klass=_name(node.get("class")), position=position)
+    status = node.get("status")
+    return Item(
+        title=title,
+        status=_name(status),
+        klass=_name(node.get("class")),
+        position=position,
+        since=_since(status),
+    )
 
 
 def _name(value: dict[str, Any] | None) -> str | None:
     return None if value is None else value.get("name")
+
+
+def _since(value: dict[str, Any] | None) -> float | None:
+    """When the status value last changed, from GitHub's own record of it."""
+    when = None if value is None else value.get("updatedAt")
+    # RULE: the time in a column comes from github's own record
+    return None if when is None else dt.datetime.fromisoformat(when).timestamp()

@@ -18,7 +18,7 @@ USED = {
     "ProjectV2Item": ["id", "type", "isArchived", "content", "fieldValueByName"],
     "ProjectV2.items": ["first", "after", "orderBy"],
     "ProjectV2ItemConnection": ["nodes", "pageInfo"],
-    "ProjectV2ItemFieldSingleSelectValue": ["name"],
+    "ProjectV2ItemFieldSingleSelectValue": ["name", "updatedAt"],
     "ProjectV2ItemOrderField": ["POSITION"],
     "ProjectV2ItemOrder": ["field", "direction"],
     "OrderDirection": ["ASC"],
@@ -79,6 +79,22 @@ def test_it_only_reads():
     for text in sent:
         assert text.lstrip().startswith("query "), text[:40]
         assert "mutation" not in text
+
+
+def test_the_status_time_is_read_as_github_writes_it():
+    """GitHub's DateTime is ISO 8601 in UTC with a Z; the item keeps it as seconds since 1970."""
+    node = {
+        "id": "PVTI_x",
+        "type": "ISSUE",
+        "isArchived": False,
+        "content": {"title": "Hall lights"},
+        "status": {"name": "Waiting for review", "updatedAt": "2026-11-22T06:00:00Z"},
+        "class": None,
+    }
+    page = {"pageInfo": {"hasNextPage": False, "endCursor": None}, "nodes": [node]}
+    body = {"data": {"owner": {"projectV2": {"items": page}}}}
+    [item] = _read(lambda _request: httpx2.Response(200, json=body))
+    assert item.since == 1795327200.0
 
 
 def test_a_board_past_the_page_cap_is_read_only_that_far():

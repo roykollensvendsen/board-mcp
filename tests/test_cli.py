@@ -11,6 +11,11 @@ def test_list_says_what_the_voice_would_hear(capsys):
     assert capsys.readouterr().out.startswith("Simulated: The board has 4 open items. 1: ")
 
 
+def test_counts_says_what_the_voice_would_hear(capsys):
+    assert cli.main(["counts", "--simulate"]) == 0
+    assert capsys.readouterr().out == "Simulated: The board has 4 open items: 3 todo, 1 in progress.\n"
+
+
 def test_with_no_token_set_up_list_says_how_to_enter_one(tmp_path, monkeypatch, capsys):
     config = tmp_path / "config.toml"
     config.write_text("[board]\nsimulate = false\n")

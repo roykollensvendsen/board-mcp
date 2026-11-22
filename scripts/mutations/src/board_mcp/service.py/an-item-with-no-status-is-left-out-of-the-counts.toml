@@ -1,0 +1,5 @@
+[[rule]]
+name = "an item with no status is left out of the counts"
+file = "src/board_mcp/service.py"
+find = 'if item\.status is None:'
+replace = 'if False:  # switched off'

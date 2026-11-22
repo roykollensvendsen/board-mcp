@@ -49,13 +49,15 @@ class Item:
     """One item on the board, as read.
 
     `title` is None for an item the key may not see. `position` is its place on the board,
-    counted from 0 in GitHub's own order.
+    counted from 0 in GitHub's own order. `since` is when its status last changed, in seconds
+    since 1970, as GitHub keeps it; None when it has no status.
     """
 
     title: str | None
     status: str | None
     klass: str | None
     position: int
+    since: float | None = None
 
 
 class Board(Protocol):
