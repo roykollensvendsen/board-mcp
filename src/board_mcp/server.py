@@ -32,7 +32,7 @@ COUNTS_DESCRIPTION = (
     "How many items are in each column of the work board?\n"
     "The count in each column, by the board's own column names, the fullest first, "
     "such as 3 waiting for review. Done is left out unless include_done is true; "
-    "an item in no column is not counted. It only reads; it changes nothing."
+    "open items in no column are said last. It only reads; it changes nothing."
 )
 #: Every tool, by name. The manifest lists the same, and each has a test file of its own.
 TOOLS = ("board_list", "board_counts")

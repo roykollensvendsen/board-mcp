@@ -97,6 +97,22 @@ def test_the_status_time_is_read_as_github_writes_it():
     assert item.since == 1795327200.0
 
 
+def test_a_time_github_writes_oddly_gives_that_item_no_time():
+    """One odd date never costs the whole answer: the item is read, with no time in its column."""
+    node = {
+        "id": "PVTI_x",
+        "type": "ISSUE",
+        "isArchived": False,
+        "content": {"title": "Hall lights"},
+        "status": {"name": "Waiting for review", "updatedAt": "yesterday"},
+        "class": None,
+    }
+    page = {"pageInfo": {"hasNextPage": False, "endCursor": None}, "nodes": [node]}
+    body = {"data": {"owner": {"projectV2": {"items": page}}}}
+    [item] = _read(lambda _request: httpx2.Response(200, json=body))
+    assert (item.status, item.since) == ("Waiting for review", None)
+
+
 def test_a_board_past_the_page_cap_is_read_only_that_far():
     """A runaway cursor never loops for ever: ten pages, then the items read so far."""
     github = FakeGitHub([FakeItem(f"Job {n}", "Todo") for n in range(PAGE * MOST_PAGES + 5)])

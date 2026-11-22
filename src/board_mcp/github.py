@@ -182,5 +182,11 @@ def _name(value: dict[str, Any] | None) -> str | None:
 def _since(value: dict[str, Any] | None) -> float | None:
     """When the status value last changed, from GitHub's own record of it."""
     when = None if value is None else value.get("updatedAt")
-    # RULE: the time in a column comes from github's own record
-    return None if when is None else dt.datetime.fromisoformat(when).timestamp()
+    if when is None:
+        return None
+    try:
+        # RULE: the time in a column comes from github's own record
+        return dt.datetime.fromisoformat(when).timestamp()
+    # RULE: a time github writes oddly gives that item no time
+    except ValueError:
+        return None
