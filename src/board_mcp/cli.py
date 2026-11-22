@@ -15,7 +15,9 @@ from board_mcp.github import GitHubBoard
 from board_mcp.service import BoardService
 
 #: Every verb this command has.
-COMMANDS: tuple[str, ...] = ("serve", "list")
+COMMANDS: tuple[str, ...] = ("serve", "list", "counts")
+#: The tool each one-shot verb calls, so it says exactly what the voice would hear.
+ONE_SHOT = {"list": "board_list", "counts": "board_counts"}
 #: Help is laid out at one width on every terminal, so a page's copy of it stays true.
 HELP = functools.partial(argparse.HelpFormatter, width=100)
 
@@ -35,7 +37,10 @@ def main(argv: list[str] | None = None) -> int:
     verbs = parser.add_subparsers(dest="command", required=True)
     serve = verbs.add_parser("serve", formatter_class=HELP, help="serve the tools over stdio, for a voice session")
     listed = verbs.add_parser("list", formatter_class=HELP, help="read the board's open items, as the voice hears them")
-    for verb in (serve, listed):
+    counted = verbs.add_parser(
+        "counts", formatter_class=HELP, help="count the items in each column, as the voice hears it"
+    )
+    for verb in (serve, listed, counted):
         verb.add_argument("--simulate", action="store_true", help="answer from the made-up board")
     args = parser.parse_args(argv)
     try:
@@ -52,9 +57,9 @@ def main(argv: list[str] | None = None) -> int:
     from board_mcp.server import build_server  # noqa: PLC0415
 
     server = build_server(service, simulated=simulate)
-    if args.command == "list":
+    if args.command in ONE_SHOT:
         # Through the tool itself, so this says exactly what the voice would hear.
-        result = asyncio.run(server.call_tool("board_list", {}))
+        result = asyncio.run(server.call_tool(ONE_SHOT[args.command], {}))
         answer = result.structured_content if isinstance(result, CallToolResult) else None
         sys.stdout.write(str((answer or {}).get("say", "")) + "\n")
         return 0

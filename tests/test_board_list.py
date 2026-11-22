@@ -88,6 +88,61 @@ def test_an_empty_board_says_so():
     assert _call(FakeGitHub([]))["say"] == "The board has no open items."
 
 
+#: A fixed now, for the fake GitHub's clock and the service's, so a wait is exact.
+NOW = 1_800_000_000.0
+
+
+def _timed(items):
+    github = FakeGitHub(items, clock=lambda: NOW)
+    service = BoardService(_board(github), RULES, clock=lambda: NOW)
+    return asyncio.run(build_server(service).call_tool("board_list", {})).structured_content
+
+
+def test_a_wait_under_an_hour_is_said_in_minutes():
+    answer = _timed(
+        [
+            FakeItem("Just moved", "In progress", "Bug", waited=30),
+            FakeItem("One minute", "In progress", "Bug", waited=60),
+            FakeItem("Hall lights", "Waiting for review", "Bug", waited=59 * 60 + 59),
+            FakeItem("One hour", "Waiting for review", "Bug", waited=3600),
+        ]
+    )
+    assert answer["say"] == (
+        "The board has 4 open items. 1: Just moved, bug, in progress for under a minute. "
+        "2: One minute, bug, in progress for 1 minute. 3: Hall lights, bug, waiting for review for 59 minutes. "
+        "4: One hour, bug, waiting for review for 1 hour."
+    )
+
+
+def test_a_wait_under_two_days_is_said_in_hours():
+    answer = _timed(
+        [
+            FakeItem("Fix the gate", "Waiting for review", "Bug", waited=6 * 3600 + 59 * 60),
+            FakeItem("Long one", "Blocked", "Bug", waited=47 * 3600 + 59 * 60),
+            FakeItem("Two days", "Blocked", "Bug", waited=48 * 3600),
+            FakeItem("Old one", "Blocked", "Bug", waited=3 * 86400 + 600),
+        ]
+    )
+    assert answer["say"] == (
+        "The board has 4 open items. 1: Fix the gate, bug, waiting for review for 6 hours. "
+        "2: Long one, bug, blocked for 47 hours. 3: Two days, bug, blocked for 2 days. "
+        "4: Old one, bug, blocked for 3 days."
+    )
+
+
+def test_the_time_in_a_column_comes_from_github_s_own_record():
+    """GitHub keeps when each item's Status value last changed; the plugin keeps nothing itself."""
+    answer = _timed([FakeItem("Hall lights", "Waiting for review", "Owner request", waited=6 * 3600)])
+    assert answer["items"][0]["waited_minutes"] == 360
+    assert answer["say"].endswith("Hall lights, owner request, waiting for review for 6 hours.")
+
+
+def test_an_item_with_no_status_is_given_no_time():
+    answer = _timed([FakeItem("Loose end", klass="Idea", waited=600)])
+    assert answer["say"] == "The board has 1 open item. 1: Loose end, idea."
+    assert answer["items"][0]["waited_minutes"] is None
+
+
 def test_every_page_of_the_board_is_read():
     """GitHub gives at most 100 items a page; a bigger board goes on with the page's end cursor."""
     github = FakeGitHub([FakeItem(f"Job {n}", "Todo") for n in range(1, 151)])

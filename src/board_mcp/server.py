@@ -23,12 +23,19 @@ SIMULATED = "SIMULATED board, not the real one: say so. "
 LIST_DESCRIPTION = (
     "What's on the work board, highest priority first?\n"
     "The open items in priority order: by class, owner requests first, then by place on the board. "
-    "Each has its number, title, class and status; an item the key may not see is said as a private item. "
+    "Each has its number, title, class and status, with how long it has been in that column; "
+    "an item the key may not see is said as a private item. "
     "limit is how many to read out, 1 to 50. The board only mirrors the work; reading it starts nothing. "
     "It only reads; it changes nothing."
 )
+COUNTS_DESCRIPTION = (
+    "How many items are in each column of the work board?\n"
+    "The count in each column, by the board's own column names, the fullest first, "
+    "such as 3 waiting for review. Done is left out unless include_done is true; "
+    "an item in no column is not counted. It only reads; it changes nothing."
+)
 #: Every tool, by name. The manifest lists the same, and each has a test file of its own.
-TOOLS = ("board_list",)
+TOOLS = ("board_list", "board_counts")
 READ_ONLY = ToolAnnotations(read_only_hint=True, destructive_hint=False, idempotent_hint=True)
 
 
@@ -48,5 +55,9 @@ def build_server(service: BoardService, *, simulated: bool = False) -> MCPServer
     @server.tool(annotations=READ_ONLY, description=LIST_DESCRIPTION)
     async def board_list(limit: int = 10) -> dict[str, Any]:
         return marked(await service.open_items(limit))
+
+    @server.tool(annotations=READ_ONLY, description=COUNTS_DESCRIPTION)
+    async def board_counts(include_done: bool = False) -> dict[str, Any]:  # noqa: FBT001, FBT002 - a tool argument
+        return marked(await service.counts(include_done=include_done))
 
     return server

@@ -12,6 +12,7 @@ copes with it.
 
 from __future__ import annotations
 
+import datetime as dt
 import json
 import re
 import time
@@ -42,15 +43,17 @@ class FakeItem:
     klass: str | None = None
     kind: str = "ISSUE"
     archived: bool = False
+    #: Seconds since its status last changed, by the fake's clock; None leaves GitHub's time out.
+    waited: float | None = None
 
 
 #: The made-up board practice mode reads.
 SAMPLE = (
-    FakeItem("Read the board aloud", "In progress", "Owner request"),
-    FakeItem("Tidy the shed", "Todo", "Idea"),
-    FakeItem("Fix the gate", "Todo", "Bug"),
-    FakeItem("Paint the fence", "Done", "Owner request"),
-    FakeItem("A plan in a private repo", "Todo", "Idea", kind="REDACTED"),
+    FakeItem("Read the board aloud", "In progress", "Owner request", waited=40 * 60),
+    FakeItem("Tidy the shed", "Todo", "Idea", waited=3 * 86400),
+    FakeItem("Fix the gate", "Todo", "Bug", waited=6 * 3600),
+    FakeItem("Paint the fence", "Done", "Owner request", waited=86400),
+    FakeItem("A plan in a private repo", "Todo", "Idea", kind="REDACTED", waited=2 * 3600),
 )
 
 
@@ -124,14 +127,23 @@ class FakeGitHub:
             "type": item.kind,
             "isArchived": item.archived,
             "content": None if item.kind == "REDACTED" else {"title": item.title},
-            "status": _value(item.status, variables["status"] == self.fields[0]),
-            "class": _value(item.klass, variables["class"] == self.fields[1]),
+            "status": _value(item.status, variables["status"] == self.fields[0], self._updated(item)),
+            "class": _value(item.klass, variables["class"] == self.fields[1], None),
         }
 
+    def _updated(self, item: FakeItem) -> str | None:
+        """When the status last changed, as GitHub writes a DateTime: ISO 8601 in UTC with a Z."""
+        if item.waited is None:
+            return None
+        when = dt.datetime.fromtimestamp(self._clock() - item.waited, tz=dt.UTC)
+        return when.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-def _value(name: str | None, field_exists: bool) -> dict[str, str] | None:  # noqa: FBT001
+
+def _value(name: str | None, field_exists: bool, updated: str | None) -> dict[str, str] | None:  # noqa: FBT001
     """A single-select value, or None when the item has none or the field is not on the board."""
-    return {"name": name} if name and field_exists else None
+    if not (name and field_exists):
+        return None
+    return {"name": name} | ({"updatedAt": updated} if updated else {})
 
 
 def _error(kind: str, message: str) -> dict[str, Any]:

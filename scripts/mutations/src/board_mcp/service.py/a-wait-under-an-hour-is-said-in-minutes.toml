@@ -1,0 +1,5 @@
+[[rule]]
+name = "a wait under an hour is said in minutes"
+file = "src/board_mcp/service.py"
+find = 'if minutes < 60:'
+replace = 'if minutes < 1000:'

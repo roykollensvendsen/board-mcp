@@ -8,6 +8,7 @@ mirrors the work: reading it starts, stops or changes nothing.
 from __future__ import annotations
 
 import math
+import time
 from typing import TYPE_CHECKING, Any
 
 from board_mcp.device import (
@@ -21,6 +22,8 @@ from board_mcp.device import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from board_mcp.device import Board, Item
     from board_mcp.settings import Settings
 
@@ -49,17 +52,32 @@ FAILURES: dict[type[DeviceError], tuple[str, str]] = {
 class BoardService:
     """What the tools ask, answered from one board and its rules."""
 
-    def __init__(self, board: Board, rules: Settings) -> None:
-        """Answer from `board`, ordered and filtered by `rules`."""
+    def __init__(self, board: Board, rules: Settings, clock: Callable[[], float] = time.time) -> None:
+        """Answer from `board`, ordered and filtered by `rules`; `clock` is now, for a wait."""
         self._board = board
         self._rules = rules
+        self._clock = clock
 
     async def open_items(self, limit: int = 10) -> dict[str, Any]:
         """The open items, highest priority first, as a sentence the voice reads."""
         if not 1 <= limit <= MOST:
             return _failed("bad_limit", f"Say how many items, from 1 to {MOST}.")
+        items = await self._read()
+        if isinstance(items, dict):
+            return items
+        return _listed(self._ordered(items), limit, self._clock())
+
+    async def counts(self, *, include_done: bool = False) -> dict[str, Any]:
+        """How many items each column holds, the fullest first, as a sentence the voice reads."""
+        items = await self._read()
+        if isinstance(items, dict):
+            return items
+        return _counted(self._columns(items, include_done=include_done), include_done=include_done)
+
+    async def _read(self) -> list[Item] | dict[str, Any]:
+        """Every item on the board, or the failed answer that says why not."""
         try:
-            items = await self._board.items()
+            return await self._board.items()
         except SlowDownError as slow:
             seconds = max(1, math.ceil(slow.seconds))
             return _failed("slow_down", f"GitHub asks for a pause; ask again in {seconds} seconds.")
@@ -68,7 +86,6 @@ class BoardService:
         # RULE: every answer has a sentence to say even when github fails
         except Exception:  # noqa: BLE001 - whatever broke, the voice gets a sentence
             return _failed("broke", BROKE)
-        return _listed(self._ordered(items), limit)
 
     def _ordered(self, items: list[Item]) -> list[Item]:
         rank = {name: n for n, name in enumerate(self._rules.class_order)}
@@ -77,11 +94,39 @@ class BoardService:
         # RULE: the board is read in class order then position
         return sorted(shown, key=lambda item: (rank.get(item.klass or "", len(rank)), item.position))
 
+    def _columns(self, items: list[Item], *, include_done: bool) -> list[tuple[str, int]]:
+        """Each column the items are in, as the board names it, with how many: the fullest first."""
+        counts: dict[str, int] = {}
+        for item in sorted(items, key=lambda item: item.position):
+            # RULE: an item with no status is left out of the counts
+            if item.status is None:
+                continue
+            # RULE: done columns are counted only when asked
+            if item.status in self._rules.done and not include_done:
+                continue
+            counts[item.status] = counts.get(item.status, 0) + 1
+        # A stable sort: equal counts keep the order their first items have on the board.
+        return sorted(counts.items(), key=lambda column: -column[1])
 
-def _listed(items: list[Item], limit: int) -> dict[str, Any]:
+
+def _counted(columns: list[tuple[str, int]], *, include_done: bool) -> dict[str, Any]:
+    total = sum(count for _, count in columns)
+    kind = "" if include_done else "open "
+    said = ", ".join(f"{count} {status.lower()}" for status, count in columns)
+    head = f"The board has {_plural(total, kind + 'item')}: {said}."
+    return {
+        "success": True,
+        "outcome": "counted",
+        "total": total,
+        "counts": [{"status": status, "count": count} for status, count in columns],
+        "say": head if total else f"The board has no {kind}items.",
+    }
+
+
+def _listed(items: list[Item], limit: int, now: float) -> dict[str, Any]:
     count = len(items)
     read = items[:limit]
-    said = [_said(n, item) for n, item in enumerate(read, 1)]
+    said = [_said(n, item, now) for n, item in enumerate(read, 1)]
     head = f"The board has {count} open {'item' if count == 1 else 'items'}."
     if not count:
         head = "The board has no open items."
@@ -92,18 +137,56 @@ def _listed(items: list[Item], limit: int) -> dict[str, Any]:
         "outcome": "listed",
         "count": count,
         "items": [
-            {"number": n, "title": item.title, "class": item.klass, "status": item.status}
+            {
+                "number": n,
+                "title": item.title,
+                "class": item.klass,
+                "status": item.status,
+                "waited_minutes": _minutes_in_column(item, now),
+            }
             for n, item in enumerate(read, 1)
         ],
         "say": " ".join([head, *said, *more]),
     }
 
 
-def _said(number: int, item: Item) -> str:
+def _said(number: int, item: Item, now: float) -> str:
     # RULE: a private item is said without its title
     name = PRIVATE if item.title is None else item.title
-    words = [name, *(word.lower() for word in (item.klass, item.status) if word)]
+    words = [name, *(word for word in (item.klass and item.klass.lower(), _in_column(item, now)) if word)]
     return f"{number}: {', '.join(words)}."
+
+
+def _minutes_in_column(item: Item, now: float) -> int | None:
+    return None if item.since is None else max(0, int((now - item.since) // 60))
+
+
+def _in_column(item: Item, now: float) -> str | None:
+    """The item's column, and how long it has been there when GitHub says."""
+    if not item.status:
+        return None
+    if item.since is None:
+        return item.status.lower()
+    return f"{item.status.lower()} for {_waited(now - item.since)}"
+
+
+def _waited(seconds: float) -> str:
+    """A time in a column, as the voice says it."""
+    minutes = int(seconds // 60)
+    if minutes < 1:
+        return "under a minute"
+    # RULE: a wait under an hour is said in minutes
+    if minutes < 60:  # noqa: PLR2004 - an hour
+        return _plural(minutes, "minute")
+    hours = minutes // 60
+    # RULE: a wait under two days is said in hours
+    if hours < 48:  # noqa: PLR2004 - two days
+        return _plural(hours, "hour")
+    return _plural(hours // 24, "day")
+
+
+def _plural(count: int, word: str) -> str:
+    return f"{count} {word}{'' if count == 1 else 's'}"
 
 
 def _failed(outcome: str, say: str) -> dict[str, Any]:
