@@ -85,6 +85,21 @@ def test_the_column_the_config_names_is_said_as_waiting_on_you():
     assert listed["say"].startswith("The board has 2 open items. 1: Sign the form, owner request, waiting on you.")
 
 
+def test_the_waiting_column_matches_whatever_its_case():
+    """A config value that differs only in capitals or edge spaces still finds the column."""
+    rules = Settings(waiting_column=" waiting ON the owner ")
+    github = FakeGitHub([FakeItem("Sign the form", "Waiting on the owner"), FakeItem("A", "Blocked")])
+    board = GitHubBoard(rules, lambda: SAMPLE_TOKEN, transport=httpx2.MockTransport(github))
+    counted = asyncio.run(build_server(BoardService(board, rules)).call_tool("board_counts", {})).structured_content
+    assert counted["say"] == "The board has 2 open items: 1 waiting on you, 1 blocked."
+
+
+def test_an_empty_waiting_column_names_no_column():
+    """The default, empty, never turns a column with a blank name into "you"."""
+    answer = _call(FakeGitHub([FakeItem("A", " ")]))
+    assert "you" not in answer["say"]
+
+
 def test_a_column_name_is_said_as_the_board_names_it():
     """Nothing in the code knows the columns: a new one is counted under its own name."""
     answer = _call(FakeGitHub([FakeItem("A", "Ready to merge"), FakeItem("B", "Ready to merge")]))

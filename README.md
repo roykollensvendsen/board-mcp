@@ -10,7 +10,8 @@ through claude-voice, as one of its plugins. It has two tools:
 
 The column names are the board's own, and the time in a column is GitHub's own record of when
 the item's Status last changed. The plugin keeps nothing itself. Name the column for work that
-waits on you as `waiting_column` in the config, and the voice says it as "waiting on you".
+waits on you as `waiting_column` in the config, and the voice says it as "waiting on you". Capitals
+and spaces at the ends don't matter.
 
 It only reads. The board mirrors the work, so reading it starts, stops or changes nothing.
 
