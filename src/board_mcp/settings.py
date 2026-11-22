@@ -45,6 +45,7 @@ class Settings:
     done: tuple[str, ...] = ("Done",)
     class_field: str = "Class"
     class_order: tuple[str, ...] = ("Owner request", "Bug", "Idea")
+    waiting_column: str = ""
     # RULE: with no config list asks for the key and never reads the fake
     simulate: bool = False
 

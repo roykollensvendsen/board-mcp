@@ -37,20 +37,52 @@ def test_done_columns_are_counted_only_when_asked():
     assert "done" not in _call(FakeGitHub(BOARD))["say"]
     asked = _call(FakeGitHub(BOARD), include_done=True)
     assert asked["say"] == (
-        "The board has 7 items: 3 waiting for review, 2 done, 1 in progress, 1 waiting on the owner."
+        "The board has 8 items: 3 waiting for review, 2 done, 1 in progress, 1 waiting on the owner, "
+        "and 1 in no column."
     )
     assert {"status": "Done", "count": 2} in asked["counts"]
 
 
 def test_an_item_with_no_status_is_left_out_of_the_counts():
+    """It is in no column, so no column counts it; it is still open, as board_list says."""
     answer = _call(FakeGitHub(BOARD))
-    assert answer["say"] == "The board has 5 open items: 3 waiting for review, 1 in progress, 1 waiting on the owner."
-    assert answer["total"] == 5
+    assert answer["say"] == (
+        "The board has 6 open items: 3 waiting for review, 1 in progress, 1 waiting on the owner, and 1 in no column."
+    )
+    assert (answer["total"], answer["in_no_column"]) == (6, 1)
     assert answer["counts"] == [
         {"status": "Waiting for review", "count": 3},
         {"status": "In progress", "count": 1},
         {"status": "Waiting on the owner", "count": 1},
     ]
+
+
+def test_the_total_is_the_one_board_list_gives():
+    github = FakeGitHub(BOARD)
+    listed = asyncio.run(
+        build_server(
+            BoardService(GitHubBoard(RULES, lambda: SAMPLE_TOKEN, transport=httpx2.MockTransport(github)), RULES)
+        ).call_tool("board_list", {})
+    ).structured_content
+    assert _call(github)["total"] == listed["count"]
+
+
+def test_a_board_with_items_in_no_column_only_says_so():
+    answer = _call(FakeGitHub([FakeItem("Loose end")]))
+    assert answer["say"] == "The board has 1 open item: 1 in no column."
+
+
+def test_the_column_the_config_names_is_said_as_waiting_on_you():
+    """The owner's own column is named after the owner; the voice says "you", and the code names no one."""
+    rules = Settings(waiting_column="Waiting on the owner")
+    github = FakeGitHub([FakeItem("Sign the form", "Waiting on the owner", "Owner request"), FakeItem("A", "Blocked")])
+    board = GitHubBoard(rules, lambda: SAMPLE_TOKEN, transport=httpx2.MockTransport(github))
+    server = build_server(BoardService(board, rules))
+    counted = asyncio.run(server.call_tool("board_counts", {})).structured_content
+    listed = asyncio.run(server.call_tool("board_list", {})).structured_content
+    assert counted["say"] == "The board has 2 open items: 1 waiting on you, 1 blocked."
+    assert counted["counts"][0]["status"] == "Waiting on the owner"
+    assert listed["say"].startswith("The board has 2 open items. 1: Sign the form, owner request, waiting on you.")
 
 
 def test_a_column_name_is_said_as_the_board_names_it():
@@ -76,4 +108,4 @@ def test_a_failure_is_said_as_board_list_says_it():
 
 def test_a_simulated_count_says_so():
     answer = _call(FakeGitHub(BOARD), simulated=True)
-    assert answer["say"].startswith("Simulated: The board has 5 open items")
+    assert answer["say"].startswith("Simulated: The board has 6 open items")

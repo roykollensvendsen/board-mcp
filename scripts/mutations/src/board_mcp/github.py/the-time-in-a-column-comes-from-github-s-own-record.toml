@@ -1,5 +1,5 @@
 [[rule]]
 name = "the time in a column comes from github's own record"
 file = "src/board_mcp/github.py"
-find = 'return None if when is None else dt\.datetime\.fromisoformat\(when\)\.timestamp\(\)'
+find = 'return dt\.datetime\.fromisoformat\(when\)\.timestamp\(\)'
 replace = 'return None'

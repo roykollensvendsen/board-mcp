@@ -5,10 +5,12 @@ through claude-voice, as one of its plugins. It has two tools:
 - `board_list`: ask "what's on the board?" and it reads the open items, highest priority first.
   Each item says how long it has been in its column, such as "waiting for review for 6 hours".
 - `board_counts`: ask "how many are waiting for review?" and it says the count in each column,
-  such as "3 waiting for review, 1 in progress". Done is left out unless asked for.
+  such as "3 waiting for review, 1 in progress". Done is left out unless asked for. Open items
+  in no column are said last, so its total is the one `board_list` gives.
 
 The column names are the board's own, and the time in a column is GitHub's own record of when
-the item's Status last changed. The plugin keeps nothing itself.
+the item's Status last changed. The plugin keeps nothing itself. Name the column for work that
+waits on you as `waiting_column` in the config, and the voice says it as "waiting on you".
 
 It only reads. The board mirrors the work, so reading it starts, stops or changes nothing.
 

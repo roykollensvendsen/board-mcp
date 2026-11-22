@@ -18,6 +18,9 @@ done = ["Done"]
 class_field = "Class"
 # The classes, highest priority first. An item with no class, or another one, comes last.
 class_order = ["Owner request", "Bug", "Idea"]
+# The Status column for work that waits on you, as named on the board. The voice says it as
+# "waiting on you". Empty: every column is said by its own name.
+waiting_column = ""
 # Answer from the made-up board in fake.py instead of GitHub. Install asks for the real board
 # above, so the copy it writes reads GitHub; `board-mcp list --simulate` still answers from the fake.
 simulate = false

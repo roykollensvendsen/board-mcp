@@ -65,14 +65,20 @@ class BoardService:
         items = await self._read()
         if isinstance(items, dict):
             return items
-        return _listed(self._ordered(items), limit, self._clock())
+        return _listed(self._ordered(items), limit, self._clock(), self._spoken)
 
     async def counts(self, *, include_done: bool = False) -> dict[str, Any]:
         """How many items each column holds, the fullest first, as a sentence the voice reads."""
         items = await self._read()
         if isinstance(items, dict):
             return items
-        return _counted(self._columns(items, include_done=include_done), include_done=include_done)
+        columns, loose = self._columns(items, include_done=include_done)
+        return _counted(columns, loose, self._spoken, include_done=include_done)
+
+    def _spoken(self, status: str) -> str:
+        """A column's name as the voice says it: the board's own, or "you" for the owner's."""
+        # RULE: the column the config names is said as waiting on you
+        return "waiting on you" if status == self._rules.waiting_column else status.lower()
 
     async def _read(self) -> list[Item] | dict[str, Any]:
         """Every item on the board, or the failed answer that says why not."""
@@ -94,39 +100,55 @@ class BoardService:
         # RULE: the board is read in class order then position
         return sorted(shown, key=lambda item: (rank.get(item.klass or "", len(rank)), item.position))
 
-    def _columns(self, items: list[Item], *, include_done: bool) -> list[tuple[str, int]]:
-        """Each column the items are in, as the board names it, with how many: the fullest first."""
+    def _columns(self, items: list[Item], *, include_done: bool) -> tuple[list[tuple[str, int]], int]:
+        """Each column the items are in, as the board names it, with how many: the fullest first.
+
+        Also how many open items are in no column, which board_list counts as open too.
+        """
         counts: dict[str, int] = {}
+        loose = 0
         for item in sorted(items, key=lambda item: item.position):
             # RULE: an item with no status is left out of the counts
             if item.status is None:
+                loose += 1
                 continue
             # RULE: done columns are counted only when asked
             if item.status in self._rules.done and not include_done:
                 continue
             counts[item.status] = counts.get(item.status, 0) + 1
         # A stable sort: equal counts keep the order their first items have on the board.
-        return sorted(counts.items(), key=lambda column: -column[1])
+        return sorted(counts.items(), key=lambda column: -column[1]), loose
 
 
-def _counted(columns: list[tuple[str, int]], *, include_done: bool) -> dict[str, Any]:
-    total = sum(count for _, count in columns)
+def _counted(
+    columns: list[tuple[str, int]], loose: int, spoken: Callable[[str], str], *, include_done: bool
+) -> dict[str, Any]:
+    total = sum(count for _, count in columns) + loose
     kind = "" if include_done else "open "
-    said = ", ".join(f"{count} {status.lower()}" for status, count in columns)
-    head = f"The board has {_plural(total, kind + 'item')}: {said}."
+    said = [f"{count} {spoken(status)}" for status, count in columns]
+    head = f"The board has {_plural(total, kind + 'item')}: {_joined(said, loose)}."
     return {
         "success": True,
         "outcome": "counted",
         "total": total,
+        "in_no_column": loose,
         "counts": [{"status": status, "count": count} for status, count in columns],
         "say": head if total else f"The board has no {kind}items.",
     }
 
 
-def _listed(items: list[Item], limit: int, now: float) -> dict[str, Any]:
+def _joined(said: list[str], loose: int) -> str:
+    """The columns' counts, with the items in no column last."""
+    if not loose:
+        return ", ".join(said)
+    tail = f"{loose} in no column"
+    return ", ".join([*said, f"and {tail}"]) if said else tail
+
+
+def _listed(items: list[Item], limit: int, now: float, spoken: Callable[[str], str]) -> dict[str, Any]:
     count = len(items)
     read = items[:limit]
-    said = [_said(n, item, now) for n, item in enumerate(read, 1)]
+    said = [_said(n, item, now, spoken) for n, item in enumerate(read, 1)]
     head = f"The board has {count} open {'item' if count == 1 else 'items'}."
     if not count:
         head = "The board has no open items."
@@ -150,10 +172,10 @@ def _listed(items: list[Item], limit: int, now: float) -> dict[str, Any]:
     }
 
 
-def _said(number: int, item: Item, now: float) -> str:
+def _said(number: int, item: Item, now: float, spoken: Callable[[str], str]) -> str:
     # RULE: a private item is said without its title
     name = PRIVATE if item.title is None else item.title
-    words = [name, *(word for word in (item.klass and item.klass.lower(), _in_column(item, now)) if word)]
+    words = [name, *(word for word in (item.klass and item.klass.lower(), _in_column(item, now, spoken)) if word)]
     return f"{number}: {', '.join(words)}."
 
 
@@ -161,13 +183,13 @@ def _minutes_in_column(item: Item, now: float) -> int | None:
     return None if item.since is None else max(0, int((now - item.since) // 60))
 
 
-def _in_column(item: Item, now: float) -> str | None:
+def _in_column(item: Item, now: float, spoken: Callable[[str], str]) -> str | None:
     """The item's column, and how long it has been there when GitHub says."""
     if not item.status:
         return None
     if item.since is None:
-        return item.status.lower()
-    return f"{item.status.lower()} for {_waited(now - item.since)}"
+        return spoken(item.status)
+    return f"{spoken(item.status)} for {_waited(now - item.since)}"
 
 
 def _waited(seconds: float) -> str:

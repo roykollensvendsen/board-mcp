@@ -1,0 +1,5 @@
+[[rule]]
+name = "a time github writes oddly gives that item no time"
+file = "src/board_mcp/github.py"
+find = 'except ValueError:'
+replace = 'except ZeroDivisionError:'
