@@ -1,0 +1,5 @@
+[[rule]]
+name = "an empty waiting column names no column"
+file = "src/board_mcp/service.py"
+find = 'if not mine:'
+replace = 'if False:'

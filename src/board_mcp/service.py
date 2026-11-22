@@ -77,8 +77,14 @@ class BoardService:
 
     def _spoken(self, status: str) -> str:
         """A column's name as the voice says it: the board's own, or "you" for the owner's."""
+        mine = _folded(self._rules.waiting_column)
+        # RULE: an empty waiting column names no column
+        if not mine:
+            return status.lower()
+        # RULE: the waiting column matches whatever its case
+        ours = _folded(status) == mine
         # RULE: the column the config names is said as waiting on you
-        return "waiting on you" if status == self._rules.waiting_column else status.lower()
+        return "waiting on you" if ours else status.lower()
 
     async def _read(self) -> list[Item] | dict[str, Any]:
         """Every item on the board, or the failed answer that says why not."""
@@ -135,6 +141,11 @@ def _counted(
         "counts": [{"status": status, "count": count} for status, count in columns],
         "say": head if total else f"The board has no {kind}items.",
     }
+
+
+def _folded(name: str) -> str:
+    """A column name as compared: no capitals, no spaces at the ends."""
+    return name.strip().casefold()
 
 
 def _joined(said: list[str], loose: int) -> str:

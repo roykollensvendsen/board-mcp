@@ -1,5 +1,5 @@
 [[rule]]
 name = "the column the config names is said as waiting on you"
 file = "src/board_mcp/service.py"
-find = 'return "waiting on you" if status == self\._rules\.waiting_column else status\.lower\(\)'
+find = 'return "waiting on you" if ours else status\.lower\(\)'
 replace = 'return status.lower()'

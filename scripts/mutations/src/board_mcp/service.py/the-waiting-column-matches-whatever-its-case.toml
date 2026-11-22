@@ -1,0 +1,5 @@
+[[rule]]
+name = "the waiting column matches whatever its case"
+file = "src/board_mcp/service.py"
+find = 'ours = _folded\(status\) == mine'
+replace = 'ours = status == self._rules.waiting_column'
